@@ -368,8 +368,7 @@ Replace `HK.jpg` and `IE.png` with your own assets (same filenames, place in pro
 
 ## 📄 License
 
-[Add your license here—e.g., MIT, GPL, etc.]
-
+MIT License
 ---
 
 ## 📖 Learn More
