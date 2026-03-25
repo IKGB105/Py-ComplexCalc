@@ -1,0 +1,385 @@
+
+# Py-ComplexCalc 🧮
+
+**A complete, user-friendly GUI ecosystem for solving n×n complex linear systems (Ax=b)**—built for electronics engineers, circuit analysts, and students working with AC circuits, impedance calculations, and complex number mathematics.
+
+**Solve Ax=b instantly** with dual-format output (polar & rectangular), flexible input, and full system persistence.
+
+---
+
+## ✨ Features
+
+- **🔢 Dual Input Format**
+  - Rectangular: `3+4j`, `-j2`, `5` (supports both `i` and `j` for imaginary unit)
+  - Phasor: `10L30`, `5L-90°`, `3L0` (polar notation with degree angles)
+  - Mix both formats in the same system
+- **📊 Dual-Format Output**
+  - Solutions shown in **polar** and **rectangular** simultaneously
+- **🌓 Multiple Themes**
+  - Dark & Light modes (toggle anytime)
+- **💾 System Persistence**
+  - Auto-save/load all computed systems
+  - Export results (`.py`, `.txt`)
+  - Session history with timestamps
+- **🎯 Dynamic Matrix Sizing**
+  - Solve 1×1 up to 10×10 systems
+- **🖼️ Customizable UI**
+  - Easily change theme colors and images
+- **🚀 Windows Standalone Executable**
+  - Single `.exe` file—no Python install needed (see [Releases](https://github.com/IKGB105/Py-ComplexCalc/releases))
+
+---
+
+## 🚀 Quick Start
+
+### Option 1: Windows Executable
+
+1. Download `UI_ComplexCalc.exe` from the latest [Release](https://github.com/IKGB105/Py-ComplexCalc/releases).
+2. Double-click to run. No dependencies needed.
+
+### Option 2: Run from Source (Linux, macOS, Windows)
+
+**Requirements:** Python 3.8+ (tested on 3.10, 3.11)
+
+```bash
+# Clone the repo
+git clone https://github.com/IKGB105/Py-ComplexCalc.git
+cd Py-ComplexCalc/code
+
+# (Optional) Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# or: .\.venv\Scripts\Activate  # Windows PowerShell
+
+# Install dependencies
+pip install numpy pillow customtkinter
+
+# Run the app
+python UI_ComplexCalc.py
+```
+
+---
+
+## 📝 Input Format Guide
+
+| Format         | Examples         | Notes                                 |
+|---------------|------------------|---------------------------------------|
+| Rectangular   | `3+4j`, `-j2`, `5` | Supports `i` and `j` for imaginary unit |
+| Phasor        | `10L30`, `5L-90°`, `3L0` | Polar notation, degree angles         |
+| Mixed         | Any combination   | Rows/columns can mix formats          |
+
+### Example: Solving a 3×3 Complex System
+
+**Problem:** Solve Ax = b where:
+```
+A = [2+1i    -1      0   ]      b = [1  ]
+    [-1    2+0.5i  -1  ]          [0  ]
+    [0      -1      2   ]          [1i ]
+```
+
+**Steps:**
+1. Launch the app
+2. Select **3×3** from size dropdown
+3. Enter matrix A and vector b values (any format)
+4. Click **Solve**
+5. View results in both forms
+
+**Output:**
+```
+x₁ = 0.8 + 0.6j  (Rectangular)
+   = 1.0 ∠ 36.87° (Polar)
+
+x₂ = 0.4 + 0.2j
+   = 0.447 ∠ 26.57°
+
+x₃ = 0.2 - 0.4j
+   = 0.447 ∠ -63.43°
+```
+
+---
+
+## 📂 Project Structure
+
+```
+code/
+├── UI_ComplexCalc.py    # Main GUI (customtkinter)
+├── ComplexCalc.py       # Core solver & parsing logic
+├── saved_systems.txt    # Auto-saved systems
+├── exported_systems.py  # Exported results
+├── HK.jpg               # UI background
+├── IE.png               # Logo icon
+├── ...                  # Themes, configs, etc.
+```
+
+---
+
+## 📋 Dependencies
+
+| Package         | Purpose                                 |
+|-----------------|-----------------------------------------|
+| `numpy`         | Linear algebra (Gaussian elimination)   |
+| `customtkinter` | Modern, theme-aware GUI widgets         |
+| `pillow`        | Image loading for UI assets             |
+
+**Install all at once:**
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🎨 Customization
+
+- **Change Theme Colors:** Edit `setup_colors()` in `UI_ComplexCalc.py`.
+- **Custom Images:** Replace `HK.jpg` and `IE.png` with your own (same filenames).
+
+---
+
+## 🐛 Troubleshooting
+
+| Problem                    | Solution                                                        |
+|----------------------------|-----------------------------------------------------------------|
+| GUI won't start            | Install/upgrade customtkinter: `pip install --upgrade customtkinter` |
+| "Singular matrix" error    | Matrix A must be invertible. Check for duplicate/linearly dependent rows. |
+| Parsing error              | Use `3+4j` (no spaces), `10L30` (not `10L30.5`).                |
+| Images not loading         | Ensure `HK.jpg` and `IE.png` exist in the same folder as `UI_ComplexCalc.py`. |
+| EXE blocked by antivirus   | False positive. Add to antivirus whitelist or build from source. |
+
+---
+
+## 📞 Support & Contributions
+
+- **Bug Reports:** [GitHub Issues](https://github.com/IKGB105/Py-ComplexCalc/issues)
+- **Feature Requests:** [GitHub Discussions](https://github.com/IKGB105/Py-ComplexCalc/discussions)
+- **Pull Requests:** Welcome! Fork, branch, and submit a PR.
+
+### Roadmap
+- [ ] Linux/macOS standalone builds
+- [ ] CSV import/export for batch solving
+- [ ] Phasor diagram real-time visualization
+- [ ] Additional theme designs
+- [ ] Advanced matrix operations (eigenvalues, determinants)
+
+---
+
+## 👥 Credits
+
+**Development Team:**
+- Iker Garcia — Lead developer, GUI design, user experience, documentation
+- Das Reyes — theming, testing, documentation
+
+**Built With:**
+- [NumPy](https://numpy.org/) — Numerical computing
+- [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) — Modern UI toolkit
+- [Pillow](https://python-pillow.org/) — Image processing
+- [PyInstaller](https://pyinstaller.org/) — Executable packaging
+
+---
+
+## 📄 License
+
+MIT License — See [LICENSE](./LICENSE) for details.
+
+**TL;DR:** Use freely, attribute the authors, no warranty.
+
+---
+
+**For Electronics Engineers, By Electronics Engineers** ⚡
+
+*"Solve complex systems instantly. Focus on the engineering that matters."*
+
+---
+
+## 🚀 Quick Start
+
+### **Option 1: Windows Executable (Easiest)**
+
+1. Download `UI_ComplexCalc.exe` from the latest [Release](https://github.com/IKGB105/Py-ComplexCalc/releases).
+2. Double-click to run. No dependencies needed.
+3. Enter matrix **A** and vector **b** values.
+4. Click **Solve** to see results.
+
+### **Option 2: Run from Source**
+
+**Requirements:** Python 3.8+ (tested on 3.10, 3.11)
+
+```bash
+# Clone the repo
+git clone https://github.com/IKGB105/Py-ComplexCalc.git
+cd Py-ComplexCalc
+
+# Create virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate          # Windows PowerShell
+# or: source .venv/bin/activate   # Linux/macOS
+
+# Install dependencies
+pip install numpy pillow customtkinter
+
+# Run the app
+python UI_ComplexCalc.py
+```
+
+---
+
+## 📝 Input Format Guide
+
+### Rectangular Notation
+```
+3+4j      → 3 + 4i
+-j2       → 0 - 2i
+5         → 5 + 0i
+2+1i      → 2 + 1i (alternative notation)
+```
+
+### Phasor Notation
+```
+10L30     → 10∠30°
+5L-90     → 5∠-90°
+3L0       → 3∠0°
+```
+
+### Mixed Example
+```
+Matrix A:
+[2+1i    -1    0   ]
+[-1    2+0.5i  -1  ]
+[0      -1     2   ]
+
+Vector b:
+[1]
+[0]
+[1i]
+```
+
+---
+
+## 🛠️ Building the Windows EXE
+
+To create your own executable:
+
+```powershell
+# Install PyInstaller
+pip install pyinstaller
+
+# Build EXE from project root
+python -m PyInstaller --onefile --windowed UI_ComplexCalc.py --add-data "HK.jpg;." --add-data "IE.png;."
+
+# Output: dist\UI_ComplexCalc.exe
+```
+
+---
+
+## 📂 Project Structure
+
+```
+Py-ComplexCalc/
+├── UI_ComplexCalc.py          # Main GUI application
+├── ComplexCalc.py             # Core solver & parsing logic
+├── HK.jpg                     # UI background asset
+├── IE.png                     # Logo icon
+├── saved_systems.txt          # Auto-generated saved systems
+├── exported_systems.py        # Auto-generated Python export
+├── README.md                  # This file
+├── RELEASE_v2.6.md           # v2.6 release notes (pink theme)
+├── RELEASE_v2.7.md           # v2.7 release notes (dark/light modes)
+└── requirements.txt           # Python dependencies
+```
+
+---
+
+## 📋 Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `numpy` | Linear algebra solving (Gaussian elimination) |
+| `customtkinter` | Modern, theme-aware GUI widgets |
+| `pillow` (PIL) | Image loading for UI assets |
+
+**Install all at once:**
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🎨 Customization
+
+### Change Theme Colors (v2.7+)
+
+Edit `setup_colors()` in `UI_ComplexCalc.py`:
+
+```python
+self.colors_dark = {
+    "bg": "#0f0f10",              # Main background
+    "frame": "#1f1f20",           # Frame background
+    "button": "#3a3a3a",          # Button color
+    "button_hover": "#4a4a4a",    # Button hover
+    # ... (see code for all options)
+}
+```
+
+### Use Custom Images
+
+Replace `HK.jpg` and `IE.png` with your own assets (same filenames, place in project root).
+
+---
+
+## 🐛 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| **GUI won't start** | Install/upgrade customtkinter: `pip install --upgrade customtkinter` |
+| **"Singular matrix" error** | Matrix A must be invertible. Check for duplicate/linearly dependent rows. |
+| **Parsing error** | Verify input format: `10L30` (not `10L30°`), `3+4j` (not `3 + 4j`). |
+| **Images not loading** | Ensure `HK.jpg` and `IE.png` exist in the same folder as `UI_ComplexCalc.py`. |
+| **EXE blocked by antivirus** | False positive. Add to antivirus whitelist or build from source. |
+
+---
+
+## 📞 Support & Contributions
+
+- **Bug Reports:** Open an [Issue](https://github.com/IKGB105/Py-ComplexCalc/issues)
+- **Feature Requests:** Describe in [Discussions](https://github.com/IKGB105/Py-ComplexCalc/discussions) or [Issues](https://github.com/IKGB105/Py-ComplexCalc/issues)
+- **Pull Requests:** Welcome! Fork, branch, and submit a PR.
+
+### Planned Features
+- CSV import/export for batch processing
+- Phasor diagram visualization
+- Linux/macOS builds
+- Additional theme presets
+
+---
+
+## 👥 Credits
+
+**Developers:**
+- Iker Garcia
+- Das Reyes
+
+
+**Built with:**
+- [NumPy](https://numpy.org/) — Numerical computing
+- [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) — Modern GUI toolkit
+- [Pillow](https://python-pillow.org/) — Image processing
+- [PyInstaller](https://pyinstaller.org/) — Executable packaging
+
+---
+
+## 📄 License
+
+[Add your license here—e.g., MIT, GPL, etc.]
+
+---
+
+## 📖 Learn More
+
+- [v2.7 Release Notes](./RELEASE_v2.7.md) — Latest features & dark/light modes
+- [v2.6 Release Notes](./RELEASE_v2.6.md) — Original pink theme release
+- [GitHub Releases](https://github.com/IKGB105/Py-ComplexCalc/releases) — Download binaries
+
+---
+
+**For Electronics Engineers, By Electronics Engineers** ⚡
+
+*"Solve complex systems instantly, focus on the circuit analysis that matters."*
