@@ -1,5 +1,5 @@
 
-# Py-ComplexCalc 🧮
+# Py-ComplexCalc
 
 **A complete, user-friendly GUI ecosystem for solving n×n complex linear systems (Ax=b)**—built for electronics engineers, circuit analysts, and students working with AC circuits, impedance calculations, and complex number mathematics.
 
