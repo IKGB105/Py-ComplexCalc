@@ -5,6 +5,8 @@
 
 **Solve Ax=b instantly** with dual-format output (polar & rectangular), flexible input, and full system persistence.
 
+![Py-ComplexCalc solving the example 3×3 system, with the solution shown in polar and rectangular form](images/app-screenshot.png)
+
 ---
 
 ## ✨ Features
