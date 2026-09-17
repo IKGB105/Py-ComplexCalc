@@ -1156,44 +1156,12 @@ class FasorCalculator(ctk.CTk):
     
     def _evaluate_expression(self, expr):
         """Safely evaluate a mathematical expression.
-        Handles both real and complex numbers, including phasor notation.
+        Handles both real and complex numbers, including phasor notation
+        (even mixed with other terms, e.g. "10L30+5L45" or "3+4j+10L30").
+        Delegates to the core so this logic is unit-tested and shared with
+        any other caller — mirrors how parse_value() delegates above.
         """
-        expr = expr.strip()
-        if not expr or expr == "0":
-            return 0
-        
-        # Check if it contains phasor notation (L for angle)
-        if 'L' in expr.upper():
-            # Try to parse as phasor or expression with phasors
-            return self.parse_value(expr)
-        
-        # Replace 'j' with 'J' temporarily to avoid conflicts
-        expr_eval = expr.replace('J', 'j')
-        expr_eval = expr.replace('i', 'j')
-        
-        # Check if it's a complex number expression (contains J)
-        if 'j' in expr_eval:
-            # Replace J back to j and parse as complex
-            expr_eval = expr_eval.replace('J', 'j')
-            # Try to evaluate as Python expression with complex numbers
-            try:
-                # Safe evaluation - only allow numbers, operators, and j
-                safe_dict = {'__builtins__': {}, 'j': 1j}
-                result = eval(expr_eval, safe_dict)
-                return result
-            except:
-                # Fallback to parse_value
-                return self.parse_value(expr)
-        
-        # It's a real number expression - evaluate it
-        try:
-            # Safe evaluation for real numbers
-            safe_dict = {'__builtins__': {}}
-            result = eval(expr_eval, safe_dict)
-            return result
-        except:
-            # Last resort - try parse_value
-            return self.parse_value(expr)
+        return self.core.evaluate_expression(expr)
     
     def _calc_operate(self, a, b, op):
         """Perform operation between two complex numbers."""

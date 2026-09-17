@@ -68,6 +68,56 @@ class FasorCalculatorCore:
             except Exception:
                 raise ValueError(f"Invalid complex value: {text}")
 
+    # Matches a single phasor token (e.g. "10L30", "5L-90°") anywhere inside a
+    # larger expression — magnitude has no sign of its own, so "5-10L30" reads
+    # as 5 minus the phasor 10∠30°, same as "5-4j" already reads as 5 minus 4j.
+    _PHASOR_TOKEN = re.compile(r'(\d+(?:\.\d+)?)[Ll]([+-]?\d+(?:\.\d+)?)°?')
+
+    def evaluate_expression(self, text: str):
+        """Evaluate a full arithmetic expression mixing rectangular and phasor
+        terms, e.g. "10L30+5L45", "3+4j+10L30", "2j*3j". Returns a complex.
+
+        `parse_value` above only ever parses ONE value (a single matrix/vector
+        cell); this is for the standalone calculator, where phasors need to
+        combine with other terms via +-*/^, not just stand alone.
+        """
+        t = (text or "").strip()
+        if not t or t == "0":
+            return 0j
+
+        # normalize angle symbol, imaginary unit, and exponent operator
+        t = t.replace(" ", "").replace("∠", "L")
+        t = re.sub(r'(?i)i', 'j', t)
+        t = t.replace("^", "**")
+
+        # expand every phasor token to an equivalent rectangular complex
+        # literal BEFORE handing the whole thing to eval — e.g.
+        # "10L30+5L45" -> "(8.66+5j)+(3.54+3.54j)", a plain Python expression.
+        def _phasor_to_literal(m):
+            r = float(m.group(1))
+            ang = np.deg2rad(float(m.group(2)))
+            # float(...) here matters: numpy>=2.0 reprs a bare np.float64 as
+            # "np.float64(...)" (NEP 51), which contains the letters in
+            # "float" — including 'l' — and would trip the leftover-L check
+            # below into thinking this is still an unexpanded phasor token.
+            real, imag = float(r * np.cos(ang)), float(r * np.sin(ang))
+            return f"({real!r}+{imag!r}j)"
+
+        t = self._PHASOR_TOKEN.sub(_phasor_to_literal, t)
+
+        # any leftover bare 'L' means a malformed phasor (e.g. "10L" or "LL30")
+        if "L" in t.upper():
+            raise ValueError(f"Invalid phasor in expression: {text}")
+
+        try:
+            result = complex(eval(t, {"__builtins__": {}}))
+        except ZeroDivisionError:
+            raise ValueError("Division by zero")
+        except Exception:
+            raise ValueError(f"Invalid expression: {text}")
+
+        return result
+
     # ----------------------------
     # Solver / formatter
     # ----------------------------

@@ -162,5 +162,118 @@ class FormattingTests(unittest.TestCase):
         self.assertIn("0", complejo_rect(z))
 
 
+class EvaluateExpressionTests(unittest.TestCase):
+    """The standalone calculator's expression evaluator — must handle
+    phasors combined with operators, not just a single standalone phasor
+    (that's all parse_value ever supported, since matrix/vector cells are
+    always a single value)."""
+
+    def setUp(self):
+        self.core = FasorCalculatorCore()
+
+    def assertComplexClose(self, actual, expected, msg=None):
+        self.assertAlmostEqual(actual.real, expected.real, places=6, msg=msg)
+        self.assertAlmostEqual(actual.imag, expected.imag, places=6, msg=msg)
+
+    def test_empty_and_zero_input(self):
+        self.assertComplexClose(self.core.evaluate_expression(""), 0j)
+        self.assertComplexClose(self.core.evaluate_expression("0"), 0j)
+
+    def test_plain_rectangular_arithmetic_still_works(self):
+        self.assertComplexClose(self.core.evaluate_expression("3+4j+1+2j"), 4 + 6j)
+        self.assertComplexClose(self.core.evaluate_expression("5-3j"), 5 - 3j)
+        self.assertComplexClose(self.core.evaluate_expression("2j*3j"), -6 + 0j)
+        self.assertComplexClose(self.core.evaluate_expression("3+4i"), 3 + 4j)
+
+    def test_two_phasors_added(self):
+        # 10∠30° + 5∠45°, computed independently for the expected value.
+        p1 = 10 * complex(math.cos(math.radians(30)), math.sin(math.radians(30)))
+        p2 = 5 * complex(math.cos(math.radians(45)), math.sin(math.radians(45)))
+        self.assertComplexClose(self.core.evaluate_expression("10L30+5L45"), p1 + p2)
+
+    def test_phasor_mixed_with_rectangular(self):
+        p = 10 * complex(math.cos(math.radians(30)), math.sin(math.radians(30)))
+        self.assertComplexClose(self.core.evaluate_expression("3+4j+10L30"), 3 + 4j + p)
+
+    def test_phasor_multiplication(self):
+        p1 = 2 * complex(math.cos(math.radians(0)), math.sin(math.radians(0)))
+        p2 = 3 * complex(math.cos(math.radians(90)), math.sin(math.radians(90)))
+        self.assertComplexClose(self.core.evaluate_expression("2L0*3L90"), p1 * p2)
+
+    def test_negative_angle_phasor_in_expression(self):
+        p1 = 5 * complex(math.cos(math.radians(-90)), math.sin(math.radians(-90)))
+        p2 = 5 * complex(math.cos(math.radians(90)), math.sin(math.radians(90)))
+        self.assertComplexClose(self.core.evaluate_expression("5L-90+5L90"), p1 + p2)
+
+    def test_degree_symbol_and_angle_notation_in_expression(self):
+        p1 = 10 * complex(math.cos(math.radians(30)), math.sin(math.radians(30)))
+        p2 = 5 * complex(math.cos(math.radians(45)), math.sin(math.radians(45)))
+        self.assertComplexClose(self.core.evaluate_expression("10L30°+5∠45"), p1 + p2)
+
+    def test_exponent_operator(self):
+        self.assertComplexClose(self.core.evaluate_expression("2^3"), 8 + 0j)
+
+    def test_division_by_zero_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.core.evaluate_expression("5/0")
+
+    # ------------------------------------------------------------------
+    # +, -, * across rectangular / phasor / mixed — the exact combinations
+    # the reported bug ("no suma complejos o fasores") covers.
+    # ------------------------------------------------------------------
+
+    def _phasor(self, r, deg):
+        return r * complex(math.cos(math.radians(deg)), math.sin(math.radians(deg)))
+
+    def test_addition_rectangular(self):
+        self.assertComplexClose(self.core.evaluate_expression("2+3j+4+5j"), 6 + 8j)
+
+    def test_addition_phasor(self):
+        expected = self._phasor(10, 30) + self._phasor(5, 45)
+        self.assertComplexClose(self.core.evaluate_expression("10L30+5L45"), expected)
+
+    def test_addition_mixed(self):
+        expected = (2 + 3j) + self._phasor(5, 60)
+        self.assertComplexClose(self.core.evaluate_expression("2+3j+5L60"), expected)
+
+    def test_subtraction_rectangular(self):
+        self.assertComplexClose(self.core.evaluate_expression("7+2j-3-1j"), 4 + 1j)
+
+    def test_subtraction_phasor(self):
+        expected = self._phasor(10, 60) - self._phasor(4, 20)
+        self.assertComplexClose(self.core.evaluate_expression("10L60-4L20"), expected)
+
+    def test_subtraction_mixed(self):
+        expected = self._phasor(8, 15) - (1 + 1j)
+        self.assertComplexClose(self.core.evaluate_expression("8L15-1-1j"), expected)
+
+    def test_multiplication_rectangular(self):
+        self.assertComplexClose(self.core.evaluate_expression("(2+3j)*(1-2j)"), (2 + 3j) * (1 - 2j))
+
+    def test_multiplication_phasor(self):
+        # magnitudes multiply, angles add — a classic AC-circuit identity.
+        expected = self._phasor(2, 10) * self._phasor(3, 20)
+        self.assertComplexClose(self.core.evaluate_expression("2L10*3L20"), expected)
+        self.assertComplexClose(expected, self._phasor(6, 30))
+
+    def test_multiplication_mixed(self):
+        expected = (2 + 0j) * self._phasor(5, 40)
+        self.assertComplexClose(self.core.evaluate_expression("2*5L40"), expected)
+
+    def test_division_phasor(self):
+        expected = self._phasor(10, 50) / self._phasor(2, 20)
+        self.assertComplexClose(self.core.evaluate_expression("10L50/2L20"), expected)
+        self.assertComplexClose(expected, self._phasor(5, 30))
+
+    def test_malformed_expression_raises_value_error_not_crash(self):
+        # Note: "3+++4" is deliberately NOT here — it's valid Python (chained
+        # unary +), evaluates to 7, not an error.
+        bad_inputs = ["10L", "LL30", "3+*4", "__import__('os')", "3+"]
+        for bad in bad_inputs:
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    self.core.evaluate_expression(bad)
+
+
 if __name__ == "__main__":
     unittest.main()
