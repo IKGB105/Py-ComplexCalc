@@ -207,7 +207,7 @@ class FasorCalculator(ctk.CTk):
         # ============================
         # CALCULATOR SECTION
         # ============================
-        calc_frame = ctk.CTkFrame(right, border_width=1, border_color="#444444", width=300, height=345)
+        calc_frame = ctk.CTkFrame(right, border_width=1, border_color="#444444", width=300, height=360)
         calc_frame.pack(pady=5, padx=10)
         calc_frame.pack_propagate(False)  # Prevent frame from resizing to content
         
@@ -261,14 +261,14 @@ class FasorCalculator(ctk.CTk):
                 btn.grid(row=i, column=j, padx=1, pady=1)
                 self.calc_buttons.append(btn)
 
-        # Separate row for the two RESULT actions, clearly apart from the
+        # Separate row for the three RESULT actions, clearly apart from the
         # typing keys above — labeled, not just a bare symbol, so there's no
         # mistaking them for something you type.
         actions_frame = ctk.CTkFrame(calc_frame, fg_color="transparent")
         actions_frame.pack(pady=(6, 2), padx=8, fill="x")
 
         self.calc_action_buttons = []
-        for text, cmd_key in [("∠ Fasor", "∠"), ("📋 Copiar", "📋")]:
+        for text, cmd_key in [("▭ Rect", "▭"), ("∠ Fasor", "∠"), ("📋 Copiar", "📋")]:
             abtn = ctk.CTkButton(
                 actions_frame,
                 text=text,
@@ -284,6 +284,7 @@ class FasorCalculator(ctk.CTk):
             calc_frame,
             text=(
                 "L = escribir fasor (ej. 10L30)\n"
+                "▭ Rect = mostrar resultado como rectangular\n"
                 "∠ Fasor = mostrar resultado como fasor\n"
                 "📋 Copiar = copiar al portapapeles (Ctrl+V en A/b)"
             ),
@@ -1141,6 +1142,16 @@ class FasorCalculator(ctk.CTk):
     # ============================
     # CALCULATOR METHODS
     # ============================
+    def _format_rect_result(self, result):
+        """Format a computed value as rectangular text for the calc display —
+        a plain real number if the imaginary part is negligible, otherwise
+        "a + bj". Shared by '=' and '▭' so both format identically."""
+        if isinstance(result, complex):
+            if abs(result.imag) < 1e-10:
+                return f"{result.real:.6g}"
+            return complejo_rect(result)
+        return f"{result:.6g}"
+
     def calc_button_click(self, btn_text):
         """Handle calculator button clicks."""
         current = self.calc_display.get()
@@ -1161,29 +1172,16 @@ class FasorCalculator(ctk.CTk):
                 self.calc_display.insert(0, new_val if new_val else "0")
 
             elif btn_text == '=':
-                # Evaluate expression
+                # Evaluate expression, shown in rectangular form.
                 try:
-                    # First try to evaluate as a mathematical expression
                     result = self._evaluate_expression(current)
-                    
-                    # Format result based on whether it's complex or real
-                    if isinstance(result, complex):
-                        if abs(result.imag) < 1e-10:
-                            # Real number
-                            display_result = f"{result.real:.6g}"
-                        else:
-                            # Complex number - show rectangular form
-                            display_result = complejo_rect(result)
-                    else:
-                        display_result = f"{result:.6g}"
-                    
                     self.calc_display.delete(0, "end")
-                    self.calc_display.insert(0, display_result)
+                    self.calc_display.insert(0, self._format_rect_result(result))
                     self.calc_operation = None
                     self.calc_first_operand = None
                 except Exception as e:
                     messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
-                        
+
             elif btn_text == '∠':
                 # Re-display whatever's currently shown (a computed result,
                 # or a value typed by hand) in phasor form.
@@ -1191,6 +1189,17 @@ class FasorCalculator(ctk.CTk):
                     result = self._evaluate_expression(current)
                     self.calc_display.delete(0, "end")
                     self.calc_display.insert(0, complejo_a_fasor(result))
+                except Exception as e:
+                    messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
+
+            elif btn_text == '▭':
+                # Mirror of '∠': re-display whatever's currently shown back
+                # in rectangular form (e.g. after converting to phasor with
+                # '∠' and wanting to switch back, without retyping).
+                try:
+                    result = self._evaluate_expression(current)
+                    self.calc_display.delete(0, "end")
+                    self.calc_display.insert(0, self._format_rect_result(result))
                 except Exception as e:
                     messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
 
