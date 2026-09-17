@@ -90,6 +90,14 @@ class FasorCalculatorCore:
         t = re.sub(r'(?i)i', 'j', t)
         t = t.replace("^", "**")
 
+        # "j" can come BEFORE its coefficient too ("j1", "-j1", "5-j1"), which
+        # Python has no literal for at all — move the digits in front of the
+        # 'j' first: "j1" -> "1j", "-j1" -> "-1j" (same regex parse_value()
+        # uses for a single value; the lookbehind means it still starts
+        # matching right at 'j' when that sign is really a binary operator
+        # after a digit, e.g. "5-j1" -> "5-1j", not "51j").
+        t = re.sub(r'(?<!\d)([+-]?)j(\d+(?:\.\d+)?)', r'\1\2j', t)
+
         # a bare 'j' isn't a valid Python complex literal on its own (only
         # "<digits>j" is, e.g. "4j") — Python would try to look it up as a
         # variable name and raise NameError. Any 'j' NOT already preceded by

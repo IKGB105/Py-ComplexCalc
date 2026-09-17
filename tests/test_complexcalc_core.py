@@ -198,6 +198,19 @@ class EvaluateExpressionTests(unittest.TestCase):
         self.assertComplexClose(self.core.evaluate_expression("j*j"), -1 + 0j)
         self.assertComplexClose(self.core.evaluate_expression("1/j"), 1 / 1j)
 
+    def test_j_before_its_coefficient(self):
+        # "j5" / "-j1" style (imaginary unit written BEFORE the number) has
+        # no Python literal at all -- must be rewritten to "5j" / "-1j"
+        # first. Real bug report: "(2+3j)+(5-j1)" raised "Invalid expression".
+        self.assertComplexClose(self.core.evaluate_expression("(2+3j)+(5-j1)"), (2 + 3j) + (5 - 1j))
+        self.assertComplexClose(self.core.evaluate_expression("j1"), 1j)
+        self.assertComplexClose(self.core.evaluate_expression("-j1"), -1j)
+        self.assertComplexClose(self.core.evaluate_expression("j5"), 5j)
+        self.assertComplexClose(self.core.evaluate_expression("j1.5"), 1.5j)
+        self.assertComplexClose(self.core.evaluate_expression("5-j1"), 5 - 1j)
+        self.assertComplexClose(self.core.evaluate_expression("3+j4"), 3 + 4j)
+        self.assertComplexClose(self.core.evaluate_expression("(3+j4)*(1-j2)"), (3 + 4j) * (1 - 2j))
+
     def test_two_phasors_added(self):
         # 10∠30° + 5∠45°, computed independently for the expected value.
         p1 = 10 * complex(math.cos(math.radians(30)), math.sin(math.radians(30)))
