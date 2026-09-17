@@ -43,7 +43,7 @@
 
 | | |
 |---|---|
-| **Version** | 4.1 — "Polar Update" |
+| **Version** | 5.0 — "Polar Update" |
 | **Last updated** | 2026-09-16 |
 | **Repository** | [github.com/IKGB105/Py-ComplexCalc](https://github.com/IKGB105/Py-ComplexCalc) |
 | **Institution** | Universidad Autónoma de Aguascalientes |

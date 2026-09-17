@@ -41,8 +41,8 @@ PINK_PATH_PHOTO = resource_path("HK.jpg")
 IE_PATH_PHOTO = resource_path("IE.png")
 
 # ------- Project metadata (used by the About dialog) -------
-APP_VERSION = "4.00"
-LAST_UPDATED = "2026-08-20"
+APP_VERSION = "5.0"
+LAST_UPDATED = "2026-09-16"
 GITHUB_URL = "https://github.com/DasReyxr/Py-ComplexCalc"
 INSTITUTION = "Universidad Autónoma de Aguascalientes"
 DEPARTMENT = "Ingeniería en Electrónica"
