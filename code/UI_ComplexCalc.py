@@ -261,37 +261,46 @@ class FasorCalculator(ctk.CTk):
                 btn.grid(row=i, column=j, padx=1, pady=1)
                 self.calc_buttons.append(btn)
 
-        # Separate row for the three RESULT actions, clearly apart from the
-        # typing keys above — labeled, not just a bare symbol, so there's no
-        # mistaking them for something you type.
-        actions_frame = ctk.CTkFrame(calc_frame, fg_color="transparent")
-        actions_frame.pack(pady=(6, 2), padx=8, fill="x")
-
-        self.calc_action_buttons = []
-        for text, cmd_key in [("▭ Rect", "▭"), ("∠ Fasor", "∠"), ("📋 Copiar", "📋")]:
-            abtn = ctk.CTkButton(
-                actions_frame,
-                text=text,
-                height=28,
-                font=("Helvetica", 10, "bold"),
-                command=lambda t=cmd_key: self.calc_button_click(t)
-            )
-            abtn.pack(side="left", expand=True, fill="x", padx=2)
-            self.calc_action_buttons.append(abtn)
-
-        # Quick guide for the non-obvious keys above.
+        # Quick guide for the non-obvious keys, ABOVE the result actions —
+        # matches the layout Profe Lafo sketched.
         ctk.CTkLabel(
             calc_frame,
             text=(
                 "L = escribir fasor (ej. 10L30)\n"
-                "▭ Rect = mostrar resultado como rectangular\n"
-                "∠ Fasor = mostrar resultado como fasor\n"
-                "📋 Copiar = copiar al portapapeles (Ctrl+V en A/b)"
+                "📋 = copiar al portapapeles (Ctrl+V en A/b)\n"
+                "r∠θ ⇄ a+jb = alternar el resultado entre fasor y rectangular"
             ),
             font=("Helvetica", 9),
             text_color="#999999",
             justify="left",
-        ).pack(pady=(4, 2), padx=8, anchor="w")
+        ).pack(pady=(6, 2), padx=8, anchor="w")
+
+        # Result actions, clearly apart from the typing keys above so there's
+        # no mistaking them for something you type: '📋' on its own, then one
+        # WIDE toggle button that flips the current result between phasor and
+        # rectangular — replaces having two separate "show as X" buttons.
+        self.calc_action_buttons = []
+
+        copy_btn = ctk.CTkButton(
+            calc_frame,
+            text="📋 Copiar",
+            height=28,
+            width=90,
+            font=("Helvetica", 10, "bold"),
+            command=lambda: self.calc_button_click("📋")
+        )
+        copy_btn.pack(pady=(0, 4), padx=8, anchor="e")
+        self.calc_action_buttons.append(copy_btn)
+
+        toggle_btn = ctk.CTkButton(
+            calc_frame,
+            text="r∠θ  ⇄  a+jb",
+            height=32,
+            font=("Helvetica", 12, "bold"),
+            command=lambda: self.calc_button_click("⇄")
+        )
+        toggle_btn.pack(pady=(0, 2), padx=8, fill="x")
+        self.calc_action_buttons.append(toggle_btn)
 
         # Add small margin at bottom
         ctk.CTkLabel(calc_frame, text="").pack(pady=2)
@@ -1182,24 +1191,21 @@ class FasorCalculator(ctk.CTk):
                 except Exception as e:
                     messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
 
-            elif btn_text == '∠':
-                # Re-display whatever's currently shown (a computed result,
-                # or a value typed by hand) in phasor form.
+            elif btn_text == '⇄':
+                # Flip whatever's currently shown (a computed result, or a
+                # value typed by hand) between phasor and rectangular form.
+                # Which direction depends on what's on the display right
+                # now: if it already looks like a phasor ("L" or "∠" present
+                # outside of a bare number), switch to rectangular; otherwise
+                # switch to phasor.
                 try:
                     result = self._evaluate_expression(current)
+                    is_phasor_now = "L" in current.upper() or "∠" in current
                     self.calc_display.delete(0, "end")
-                    self.calc_display.insert(0, complejo_a_fasor(result))
-                except Exception as e:
-                    messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
-
-            elif btn_text == '▭':
-                # Mirror of '∠': re-display whatever's currently shown back
-                # in rectangular form (e.g. after converting to phasor with
-                # '∠' and wanting to switch back, without retyping).
-                try:
-                    result = self._evaluate_expression(current)
-                    self.calc_display.delete(0, "end")
-                    self.calc_display.insert(0, self._format_rect_result(result))
+                    if is_phasor_now:
+                        self.calc_display.insert(0, self._format_rect_result(result))
+                    else:
+                        self.calc_display.insert(0, complejo_a_fasor(result))
                 except Exception as e:
                     messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
 
