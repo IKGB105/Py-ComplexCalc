@@ -236,11 +236,15 @@ class FasorCalculator(ctk.CTk):
         button_frame.pack(pady=3, padx=8)
         
         # Calculator buttons layout
+        # 'L' types phasor notation (e.g. "10L30"); '∠' re-displays whatever
+        # result is currently shown in phasor form; '📋' copies the current
+        # display straight to the clipboard so it can be pasted (Ctrl+V) into
+        # any matrix/vector cell in the system below.
         buttons = [
             ['7', '8', '9', '/', 'C', '⌫'],
-            ['4', '5', '6', '*', '('],
-            ['1', '2', '3', '-', ')'],
-            ['0', '.', 'j', '+', '=']
+            ['4', '5', '6', '*', '(', 'L'],
+            ['1', '2', '3', '-', ')', '∠'],
+            ['0', '.', 'j', '+', '=', '📋']
         ]
         
         self.calc_buttons = []
@@ -1135,15 +1139,31 @@ class FasorCalculator(ctk.CTk):
                 except Exception as e:
                     messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
                         
+            elif btn_text == '∠':
+                # Re-display whatever's currently shown (a computed result,
+                # or a value typed by hand) in phasor form.
+                try:
+                    result = self._evaluate_expression(current)
+                    self.calc_display.delete(0, "end")
+                    self.calc_display.insert(0, complejo_a_fasor(result))
+                except Exception as e:
+                    messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
+
+            elif btn_text == '📋':
+                # Copy the display verbatim to the clipboard so it can be
+                # pasted (Ctrl+V) straight into any matrix/vector cell below.
+                self.clipboard_clear()
+                self.clipboard_append(current)
+
             elif btn_text in ['+', '-', '*', '/', '^']:
                 # Just add the operator to the display
                 if current and current != "0":
                     # If operator is ^ convert to **
                     operator = '**' if btn_text == '^' else btn_text
                     self.calc_display.insert("end", operator)
-                    
-        
-            elif btn_text in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'j', '(', ')']:
+
+
+            elif btn_text in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'j', '(', ')', 'L']:
                 # Number or symbol input - show what you're typing
                 if current == "0" and btn_text != '.':
                     self.calc_display.delete(0, "end")
