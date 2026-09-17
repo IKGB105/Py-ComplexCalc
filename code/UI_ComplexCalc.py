@@ -207,7 +207,7 @@ class FasorCalculator(ctk.CTk):
         # ============================
         # CALCULATOR SECTION
         # ============================
-        calc_frame = ctk.CTkFrame(right, border_width=1, border_color="#444444", width=300, height=280)
+        calc_frame = ctk.CTkFrame(right, border_width=1, border_color="#444444", width=300, height=345)
         calc_frame.pack(pady=5, padx=10)
         calc_frame.pack_propagate(False)  # Prevent frame from resizing to content
         
@@ -261,6 +261,19 @@ class FasorCalculator(ctk.CTk):
                 btn.grid(row=i, column=j, padx=1, pady=1)
                 self.calc_buttons.append(btn)
         
+        # Quick guide for the three non-obvious keys added above the digits.
+        ctk.CTkLabel(
+            calc_frame,
+            text=(
+                "L = escribir fasor (ej. 10L30)\n"
+                "∠ = mostrar resultado como fasor\n"
+                "📋 = copiar al portapapeles (Ctrl+V en A/b)"
+            ),
+            font=("Helvetica", 9),
+            text_color="#999999",
+            justify="left",
+        ).pack(pady=(4, 2), padx=8, anchor="w")
+
         # Add small margin at bottom
         ctk.CTkLabel(calc_frame, text="").pack(pady=2)
 

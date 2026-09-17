@@ -185,6 +185,19 @@ class EvaluateExpressionTests(unittest.TestCase):
         self.assertComplexClose(self.core.evaluate_expression("2j*3j"), -6 + 0j)
         self.assertComplexClose(self.core.evaluate_expression("3+4i"), 3 + 4j)
 
+    def test_bare_j_is_not_a_valid_python_literal_on_its_own(self):
+        # "j" alone (or "-j", "3*j", "(j)"...) isn't a Python complex literal
+        # -- only "<digits>j" is (e.g. "4j"); a bare 'j' is a NAME lookup and
+        # raises NameError unless normalized to "1j" first.
+        self.assertComplexClose(self.core.evaluate_expression("j"), 1j)
+        self.assertComplexClose(self.core.evaluate_expression("-j"), -1j)
+        self.assertComplexClose(self.core.evaluate_expression("+j"), 1j)
+        self.assertComplexClose(self.core.evaluate_expression("3*j"), 3j)
+        self.assertComplexClose(self.core.evaluate_expression("(j)"), 1j)
+        self.assertComplexClose(self.core.evaluate_expression("2j+j"), 3j)
+        self.assertComplexClose(self.core.evaluate_expression("j*j"), -1 + 0j)
+        self.assertComplexClose(self.core.evaluate_expression("1/j"), 1 / 1j)
+
     def test_two_phasors_added(self):
         # 10∠30° + 5∠45°, computed independently for the expected value.
         p1 = 10 * complex(math.cos(math.radians(30)), math.sin(math.radians(30)))

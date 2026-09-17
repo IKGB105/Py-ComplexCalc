@@ -90,6 +90,12 @@ class FasorCalculatorCore:
         t = re.sub(r'(?i)i', 'j', t)
         t = t.replace("^", "**")
 
+        # a bare 'j' isn't a valid Python complex literal on its own (only
+        # "<digits>j" is, e.g. "4j") — Python would try to look it up as a
+        # variable name and raise NameError. Any 'j' NOT already preceded by
+        # a digit/'.' means "1j": handles "j", "-j", "3*j", "(j)", "2j+j", etc.
+        t = re.sub(r'(?<![\d.])j', '1j', t)
+
         # expand every phasor token to an equivalent rectangular complex
         # literal BEFORE handing the whole thing to eval — e.g.
         # "10L30+5L45" -> "(8.66+5j)+(3.54+3.54j)", a plain Python expression.
