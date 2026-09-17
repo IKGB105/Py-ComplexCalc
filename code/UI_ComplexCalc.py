@@ -54,6 +54,35 @@ CREATORS = [
 #DPINK_PATH_THEME = resource_path("DarkPink.json")
 #LPINK_PATH_THEME = fr"{CURRENT_PATH}\LightPink.json"
 
+# ------- AUX Calc (built-in calculator) translated strings -------
+# Only the calculator panel is bilingual — the rest of the app's labels were
+# already English. Symbols ("L", "r∠θ ⇄ a+jb") aren't language-specific, so
+# they're the same in both.
+CALC_TEXT = {
+    "en": {
+        "guide": (
+            "L = type a phasor (e.g. 10L30)\n"
+            "📋 = copy to clipboard (Ctrl+V into A/b)\n"
+            "r∠θ ⇄ a+jb = toggle result between phasor and rectangular"
+        ),
+        "copy_btn": "📋 Copy",
+        "error_title": "Error",
+        "invalid_expr": "Invalid expression:\n{expr}\n\n{err}",
+        "calc_error": "Calculator error: {err}",
+    },
+    "es": {
+        "guide": (
+            "L = escribir fasor (ej. 10L30)\n"
+            "📋 = copiar al portapapeles (Ctrl+V en A/b)\n"
+            "r∠θ ⇄ a+jb = alternar el resultado entre fasor y rectangular"
+        ),
+        "copy_btn": "📋 Copiar",
+        "error_title": "Error",
+        "invalid_expr": "Expresión inválida:\n{expr}\n\n{err}",
+        "calc_error": "Error en calculadora: {err}",
+    },
+}
+
 class FasorCalculator(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -105,6 +134,19 @@ class FasorCalculator(ctk.CTk):
         )
         self.theme_selector.set("Dark")
         self.theme_selector.pack(side="left")
+
+        # AUX Calc language — only the calculator panel's own text changes;
+        # everything else in the app was already English.
+        self.calc_lang = "en"
+        ctk.CTkLabel(theme_frame, text="AUX Calc:", font=("Helvetica", 11)).pack(side="left", padx=(15, 5))
+        self.calc_lang_selector = ctk.CTkOptionMenu(
+            theme_frame,
+            values=["English", "Español"],
+            command=self.change_calc_language,
+            width=100
+        )
+        self.calc_lang_selector.set("English")
+        self.calc_lang_selector.pack(side="left")
 
         # Header area: big title, smaller names header, and small IE image to the right
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -211,7 +253,7 @@ class FasorCalculator(ctk.CTk):
         calc_frame.pack(pady=5, padx=10)
         calc_frame.pack_propagate(False)  # Prevent frame from resizing to content
         
-        ctk.CTkLabel(calc_frame, text="🧮 Calculadora:", font=("Helvetica", 12, "bold")).pack(pady=2)
+        ctk.CTkLabel(calc_frame, text="🧮 AUX Calc", font=("Helvetica", 12, "bold")).pack(pady=2)
         
         # Calculator display - shows what you're typing
         self.calc_display = ctk.CTkEntry(
@@ -262,18 +304,16 @@ class FasorCalculator(ctk.CTk):
                 self.calc_buttons.append(btn)
 
         # Quick guide for the non-obvious keys, ABOVE the result actions —
-        # matches the layout Profe Lafo sketched.
-        ctk.CTkLabel(
+        # matches the layout Profe Lafo sketched. Text comes from CALC_TEXT
+        # so change_calc_language() can swap it live.
+        self.calc_guide_label = ctk.CTkLabel(
             calc_frame,
-            text=(
-                "L = escribir fasor (ej. 10L30)\n"
-                "📋 = copiar al portapapeles (Ctrl+V en A/b)\n"
-                "r∠θ ⇄ a+jb = alternar el resultado entre fasor y rectangular"
-            ),
+            text=CALC_TEXT[self.calc_lang]["guide"],
             font=("Helvetica", 9),
             text_color="#999999",
             justify="left",
-        ).pack(pady=(6, 2), padx=8, anchor="w")
+        )
+        self.calc_guide_label.pack(pady=(6, 2), padx=8, anchor="w")
 
         # Result actions, clearly apart from the typing keys above so there's
         # no mistaking them for something you type: '📋' on its own, then one
@@ -281,16 +321,16 @@ class FasorCalculator(ctk.CTk):
         # rectangular — replaces having two separate "show as X" buttons.
         self.calc_action_buttons = []
 
-        copy_btn = ctk.CTkButton(
+        self.calc_copy_button = ctk.CTkButton(
             calc_frame,
-            text="📋 Copiar",
+            text=CALC_TEXT[self.calc_lang]["copy_btn"],
             height=28,
             width=90,
             font=("Helvetica", 10, "bold"),
             command=lambda: self.calc_button_click("📋")
         )
-        copy_btn.pack(pady=(0, 4), padx=8, anchor="e")
-        self.calc_action_buttons.append(copy_btn)
+        self.calc_copy_button.pack(pady=(0, 4), padx=8, anchor="e")
+        self.calc_action_buttons.append(self.calc_copy_button)
 
         toggle_btn = ctk.CTkButton(
             calc_frame,
@@ -566,6 +606,17 @@ class FasorCalculator(ctk.CTk):
         self.colors_purple = themes["purple"]
         self.colors_ocean = themes["ocean"]
                 
+    def change_calc_language(self, display_name):
+        """Switch the AUX Calc panel's own text (guide + copy button) between
+        English and Spanish. Nothing else in the app is affected — those
+        labels were already English before this panel existed."""
+        self.calc_lang = "es" if display_name == "Español" else "en"
+        text = CALC_TEXT[self.calc_lang]
+        if hasattr(self, "calc_guide_label"):
+            self.calc_guide_label.configure(text=text["guide"])
+        if hasattr(self, "calc_copy_button"):
+            self.calc_copy_button.configure(text=text["copy_btn"])
+
     def change_theme(self, theme_name):
         """Change the application theme based on selection."""
         ctk.set_appearance_mode("dark")  # Always use dark appearance for CustomTkinter
@@ -1189,7 +1240,8 @@ class FasorCalculator(ctk.CTk):
                     self.calc_operation = None
                     self.calc_first_operand = None
                 except Exception as e:
-                    messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
+                    t = CALC_TEXT[self.calc_lang]
+                    messagebox.showerror(t["error_title"], t["invalid_expr"].format(expr=current, err=e))
 
             elif btn_text == '⇄':
                 # Flip whatever's currently shown (a computed result, or a
@@ -1207,7 +1259,8 @@ class FasorCalculator(ctk.CTk):
                     else:
                         self.calc_display.insert(0, complejo_a_fasor(result))
                 except Exception as e:
-                    messagebox.showerror("Error", f"Expresión inválida:\n{current}\n\n{str(e)}")
+                    t = CALC_TEXT[self.calc_lang]
+                    messagebox.showerror(t["error_title"], t["invalid_expr"].format(expr=current, err=e))
 
             elif btn_text == '📋':
                 # Copy the display verbatim to the clipboard so it can be
@@ -1232,7 +1285,8 @@ class FasorCalculator(ctk.CTk):
                     self.calc_display.insert("end", btn_text)
                     
         except Exception as e:
-            messagebox.showerror("Error", f"Error en calculadora: {e}")
+            t = CALC_TEXT[self.calc_lang]
+            messagebox.showerror(t["error_title"], t["calc_error"].format(err=e))
     
     def _evaluate_expression(self, expr):
         """Safely evaluate a mathematical expression.
