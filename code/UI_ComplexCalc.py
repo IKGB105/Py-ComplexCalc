@@ -235,18 +235,18 @@ class FasorCalculator(ctk.CTk):
         button_frame = ctk.CTkFrame(calc_frame)
         button_frame.pack(pady=3, padx=8)
         
-        # Calculator buttons layout
-        # 'L' types phasor notation (e.g. "10L30"); '∠' re-displays whatever
-        # result is currently shown in phasor form; '📋' copies the current
-        # display straight to the clipboard so it can be pasted (Ctrl+V) into
-        # any matrix/vector cell in the system below.
+        # Calculator buttons layout. 'L' types phasor notation (e.g.
+        # "10L30") — a real input key, so it stays with the digits. '∠' and
+        # '📋' are ACTIONS (convert / copy the current result), not input —
+        # keeping them out of this grid, per feedback that people instinctively
+        # reach for '∠' here thinking it types the angle symbol.
         buttons = [
             ['7', '8', '9', '/', 'C', '⌫'],
             ['4', '5', '6', '*', '(', 'L'],
-            ['1', '2', '3', '-', ')', '∠'],
-            ['0', '.', 'j', '+', '=', '📋']
+            ['1', '2', '3', '-', ')'],
+            ['0', '.', 'j', '+', '=']
         ]
-        
+
         self.calc_buttons = []
         for i, row in enumerate(buttons):
             for j, btn_text in enumerate(row):
@@ -260,14 +260,32 @@ class FasorCalculator(ctk.CTk):
                 )
                 btn.grid(row=i, column=j, padx=1, pady=1)
                 self.calc_buttons.append(btn)
-        
-        # Quick guide for the three non-obvious keys added above the digits.
+
+        # Separate row for the two RESULT actions, clearly apart from the
+        # typing keys above — labeled, not just a bare symbol, so there's no
+        # mistaking them for something you type.
+        actions_frame = ctk.CTkFrame(calc_frame, fg_color="transparent")
+        actions_frame.pack(pady=(6, 2), padx=8, fill="x")
+
+        self.calc_action_buttons = []
+        for text, cmd_key in [("∠ Fasor", "∠"), ("📋 Copiar", "📋")]:
+            abtn = ctk.CTkButton(
+                actions_frame,
+                text=text,
+                height=28,
+                font=("Helvetica", 10, "bold"),
+                command=lambda t=cmd_key: self.calc_button_click(t)
+            )
+            abtn.pack(side="left", expand=True, fill="x", padx=2)
+            self.calc_action_buttons.append(abtn)
+
+        # Quick guide for the non-obvious keys above.
         ctk.CTkLabel(
             calc_frame,
             text=(
                 "L = escribir fasor (ej. 10L30)\n"
-                "∠ = mostrar resultado como fasor\n"
-                "📋 = copiar al portapapeles (Ctrl+V en A/b)"
+                "∠ Fasor = mostrar resultado como fasor\n"
+                "📋 Copiar = copiar al portapapeles (Ctrl+V en A/b)"
             ),
             font=("Helvetica", 9),
             text_color="#999999",
@@ -496,7 +514,14 @@ class FasorCalculator(ctk.CTk):
                     text_color=self.current_colors.get("button_text", "#FFFFFF"),
                     hover_color=self.current_colors["button_hover"]
                 )
-        
+        if hasattr(self, "calc_action_buttons"):
+            for btn in self.calc_action_buttons:
+                btn.configure(
+                    fg_color=self.current_colors["button"],
+                    text_color=self.current_colors.get("button_text", "#FFFFFF"),
+                    hover_color=self.current_colors["button_hover"]
+                )
+
         # Style calculator display
         if hasattr(self, "calc_display"):
             self.calc_display.configure(
@@ -594,6 +619,13 @@ class FasorCalculator(ctk.CTk):
         # Style calculator components
         if hasattr(self, "calc_buttons"):
             for calc_btn in self.calc_buttons:
+                calc_btn.configure(
+                    fg_color=self.current_colors["button"],
+                    text_color=self.current_colors.get("button_text", "#FFFFFF"),
+                    hover_color=self.current_colors["button_hover"]
+                )
+        if hasattr(self, "calc_action_buttons"):
+            for calc_btn in self.calc_action_buttons:
                 calc_btn.configure(
                     fg_color=self.current_colors["button"],
                     text_color=self.current_colors.get("button_text", "#FFFFFF"),
