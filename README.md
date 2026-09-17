@@ -28,7 +28,12 @@
 - **🎯 Dynamic Matrix Sizing**
   - Solve 1×1 up to 10×10 systems
 - **🧮 Built-in Calculator**
-  - Quick complex-number scratchpad with backspace support
+  - Quick scratchpad for rectangular, phasor, and mixed expressions
+    (`10L30+5L45`, `3+4j+10L30`, `2L0*3L90`...) with backspace support
+  - **L** key types phasor notation straight from the button grid
+  - **∠** re-displays the current result in phasor form
+  - **📋** copies the display to the clipboard — paste (Ctrl+V) directly
+    into any matrix `A` / vector `b` cell in the system below
 - **🚀 Standalone Executables**
   - Windows `.exe` and Linux binary — no Python install needed (see [Releases](https://github.com/IKGB105/Py-ComplexCalc/releases))
 
@@ -38,8 +43,8 @@
 
 | | |
 |---|---|
-| **Version** | 4.00 |
-| **Last updated** | 2026-08-21 |
+| **Version** | 4.1 — "Polar Update" |
+| **Last updated** | 2026-09-16 |
 | **Repository** | [github.com/IKGB105/Py-ComplexCalc](https://github.com/IKGB105/Py-ComplexCalc) |
 | **Institution** | Universidad Autónoma de Aguascalientes |
 | **Department** | Ingeniería en Electrónica |
@@ -85,6 +90,11 @@ python UI_ComplexCalc.py
 | Rectangular   | `3+4j`, `-j2`, `5` | Supports `i` and `j` for imaginary unit |
 | Phasor        | `10L30`, `5L-90°`, `3L0` | Polar notation, degree angles         |
 | Mixed         | Any combination   | Rows/columns can mix formats          |
+
+> Matrix/vector cells take exactly one value. The built-in calculator (in
+> the right panel) is different: it evaluates a full expression — operators
+> and all — so `10L30+5L45`, `3+4j+10L30`, `2L0*3L90` compute directly, and
+> `📋` copies the result straight into any cell above.
 
 ### Example: Solving a 3×3 Complex System
 
